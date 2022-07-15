@@ -1,0 +1,30 @@
+const assert = require ('assert')
+Feature('category')
+Before(async ({ I, mainPage, currentPage }) => {
+    I.amOnPage('https://admin-bro-example-app-staging.herokuapp.com/admin/login')
+    I.resizeWindow(1440, 920)
+    await mainPage.login('test@example.com', 'password')
+    await currentPage.openCategories()
+})
+Scenario('Create new category', async ({ I, categoryPage }) => {
+    await categoryPage.createNew('Testing', 'Gazizov R.', 'JS QA', '1')
+    const title = await categoryPage.getFirstTitle()
+    assert.deepStrictEqual(title, 'Testing', 'Wrong title')
+})
+Scenario('Show category', async ({ I, categoryPage }) => {
+    I.waitForVisible(categoryPage.locators.elementId)
+    const id = await I.grabTextFrom(categoryPage.locators.elementId)
+    await categoryPage.show()
+    const showID = await I.grabTextFrom(categoryPage.locators.idInForm)
+    assert.deepStrictEqual(id, showID.substr(2), 'Ids dont match')
+})
+Scenario('Edit category title', async ({ I, categoryPage }) => {
+    await categoryPage.editTitle('Task')
+    const title = await categoryPage.getFirstTitle()
+    assert.deepStrictEqual(title, 'Task', 'Wrong title')
+})
+Scenario('Delete category', async ({ I, categoryPage }) => {
+    await categoryPage.delete()
+    const text = await categoryPage.getPhrase()
+    assert.deepStrictEqual(text, 'No records', 'Wrong text')
+})
